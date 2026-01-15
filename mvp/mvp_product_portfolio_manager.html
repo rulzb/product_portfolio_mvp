@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Product Analyst - Prototipo MVP</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons: Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; color: #111827; }
+        
+        .view-section { display: none; height: 100vh; width: 100vw; overflow: hidden; }
+        .view-section.active { display: flex; }
+
+        .input-focus:focus { outline: none; border-color: #6366F1; ring: 2px; ring-color: #E0E7FF; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #D1D5DB; }
+
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        #cursor-line {
+            pointer-events: none; display: none; position: absolute; top: 0; bottom: 0; width: 1px;
+            background-color: #6366F1; border-left: 1px dashed #6366F1; z-index: 10;
+        }
+        .event-node { transition: all 0.2s ease; }
+        .event-node:hover { transform: scale(1.2); z-index: 20; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        .metric-tab.active { color: var(--active-color); border-bottom-color: var(--active-color); }
+        .metric-tab.active .metric-dot { background-color: var(--active-color); }
+        .metric-dot { background-color: #D1D5DB; transition: background-color 0.2s; }
+
+        /* Styles for Import Modal Tabs */
+        .import-tab.active { background-color: #F3F4F6; color: #111827; border-color: #E5E7EB; }
+        .import-tab { color: #6B7280; border: 1px solid transparent; }
+
+        /* View Switcher Active State */
+        .view-btn.active { background-color: #F3F4F6; color: #111827; }
+        .view-btn { color: #9CA3AF; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: LOGIN                              -->
+    <!-- ========================================== -->
+    <section id="view-login" class="view-section active flex-row">
+        <!-- Panel Izquierdo: Formulario -->
+        <div class="w-full md:w-1/2 bg-white flex flex-col justify-center px-12 lg:px-24">
+            <div class="mb-8">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">
+                        <i data-lucide="activity" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight">ProductAI</span>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Bienvenido de nuevo</h1>
+                <p class="text-gray-500">Ingresa para visualizar la causalidad en tu portafolio.</p>
+            </div>
+            
+            <!-- SSO Buttons -->
+            <div class="space-y-4">
+                <button onclick="navigateTo('setup')" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-lg transition-all">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    Continuar con Google
+                </button>
+                <button onclick="navigateTo('setup')" class="w-full flex items-center justify-center gap-3 bg-gray-900 hover:bg-black text-white font-medium py-2.5 px-4 rounded-lg transition-all">
+                    <i data-lucide="github" class="w-5 h-5"></i>
+                    Continuar con GitHub
+                </button>
+            </div>
+
+            <!-- Email Section -->
+            <div class="relative my-8">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+                <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-gray-500">O ingresa con email</span></div>
+            </div>
+
+            <div class="flex gap-2">
+                <input type="email" placeholder="tu@empresa.com" class="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all input-focus">
+                <button onclick="navigateTo('setup')" class="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2.5 rounded-lg transition-colors">
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel Derecho: Gráfico Decorativo -->
+        <div class="hidden md:flex w-1/2 bg-gray-50 items-center justify-center relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#E5E7EB_1px,transparent_1px)] [background-size:16px_16px] opacity-50"></div>
+            
+             <!-- Visual Hook (Abstract Chart) -->
+             <div class="relative bg-white p-6 rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                </div>
+                <div class="h-32 bg-indigo-50 rounded-lg mb-4 relative overflow-hidden">
+                    <!-- SVG Area Chart Background -->
+                    <svg viewBox="0 0 100 40" class="absolute bottom-0 w-full h-full text-indigo-500 fill-current opacity-20">
+                        <path d="M0 40 L0 30 Q20 10 40 30 T80 20 L100 30 L100 40 Z" />
+                    </svg>
+                    <!-- SVG Line Chart -->
+                    <svg viewBox="0 0 100 40" class="absolute bottom-0 w-full h-full text-indigo-500 stroke-current fill-none stroke-2">
+                        <path d="M0 30 Q20 10 40 30 T80 20 L100 30" />
+                    </svg>
+                    <!-- Insight Dot -->
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full border-2 border-indigo-500 shadow-sm z-10 animate-pulse"></div>
+                </div>
+                <div class="space-y-2">
+                    <div class="h-2 bg-gray-100 rounded w-3/4"></div>
+                    <div class="h-2 bg-gray-100 rounded w-1/2"></div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-gray-50">
+                    <p class="text-xs font-medium text-gray-500 text-center">"Tu portafolio, explicado."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: SETUP WIZARD                       -->
+    <!-- ========================================== -->
+    <section id="view-setup" class="view-section flex-col items-center bg-white pt-12">
+        <div class="w-full max-w-2xl px-6">
+            <!-- Stepper -->
+            <div class="flex justify-between items-start mb-12 relative">
+                <!-- Línea de fondo (Conector) -->
+                <div class="absolute top-4 left-0 w-full h-0.5 bg-gray-300 z-0 transform -translate-y-1/2"></div>
+                
+                <!-- Paso 1 -->
+                <div class="relative z-10 flex flex-col items-center gap-2 bg-white px-2">
+                    <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-sm font-bold border-2 border-black shadow-sm">1</div>
+                    <span class="text-xs font-medium text-gray-900">Ejecución</span>
+                </div>
+                
+                <!-- Paso 2 -->
+                <div class="relative z-10 flex flex-col items-center gap-2 bg-white px-2" id="step-indicator-2">
+                    <div class="w-8 h-8 rounded-full bg-white text-gray-400 flex items-center justify-center text-sm font-bold border-2 border-gray-300 transition-colors shadow-sm">2</div>
+                    <span class="text-xs font-medium text-gray-400 transition-colors">Datos</span>
+                </div>
+                
+                <!-- Paso 3 -->
+                <div class="relative z-10 flex flex-col items-center gap-2 bg-white px-2" id="step-indicator-3">
+                    <div class="w-8 h-8 rounded-full bg-white text-gray-400 flex items-center justify-center text-sm font-bold border-2 border-gray-300 transition-colors shadow-sm">3</div>
+                    <span class="text-xs font-medium text-gray-400 transition-colors">Producto</span>
+                </div>
+            </div>
+
+            <!-- STEP 1 -->
+            <div id="setup-step-1" class="setup-step fade-in">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Conecta tus herramientas</h2>
+                <p class="text-gray-500 mb-8">¿Dónde vive el código de tus Productos?</p>
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <!-- Jira -->
+                    <div class="border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-indigo-500 hover:shadow-md transition-all group relative" onclick="toggleSelection(this)">
+                        <div class="absolute top-3 right-3 opacity-0 group-[.selected]:opacity-100 text-indigo-600">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 fill-current"></i>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 mb-3"><i data-lucide="trello" class="w-6 h-6"></i></div>
+                        <h3 class="font-semibold text-gray-900">Jira Software</h3>
+                        <p class="text-xs text-gray-500 mt-1">Issues, Epics & Sprints</p>
+                    </div>
+                    <!-- GitHub -->
+                    <div class="border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-indigo-500 hover:shadow-md transition-all group relative" onclick="toggleSelection(this)">
+                        <div class="absolute top-3 right-3 opacity-0 group-[.selected]:opacity-100 text-indigo-600">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 fill-current"></i>
+                        </div>
+                        <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-900 mb-3"><i data-lucide="github" class="w-6 h-6"></i></div>
+                        <h3 class="font-semibold text-gray-900">GitHub</h3>
+                        <p class="text-xs text-gray-500 mt-1">Commits & Deploys</p>
+                    </div>
+                </div>
+                <div class="flex justify-end pt-8 border-t border-gray-100">
+                    <button onclick="nextSetupStep(2)" class="bg-black hover:bg-gray-800 text-white font-medium py-2 px-6 rounded-lg transition-colors">Continuar</button>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div id="setup-step-2" class="setup-step hidden fade-in">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Conecta tus resultados</h2>
+                <p class="text-gray-500 mb-8">¿Dónde mides el éxito?</p>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <!-- Amplitude -->
+                    <div class="border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-indigo-500 hover:shadow-md transition-all group relative" onclick="toggleSelection(this)">
+                        <div class="absolute top-3 right-3 opacity-0 group-[.selected]:opacity-100 text-indigo-600">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 fill-current"></i>
+                        </div>
+                        <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 mb-3"><i data-lucide="bar-chart-2" class="w-6 h-6"></i></div>
+                        <h3 class="font-semibold text-gray-900">Amplitude</h3>
+                        <p class="text-xs text-gray-500 mt-1">Product Analytics</p>
+                    </div>
+                    <!-- GA4 -->
+                    <div class="border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-indigo-500 hover:shadow-md transition-all group relative" onclick="toggleSelection(this)">
+                        <div class="absolute top-3 right-3 opacity-0 group-[.selected]:opacity-100 text-indigo-600">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 fill-current"></i>
+                        </div>
+                        <div class="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center text-yellow-600 mb-3"><i data-lucide="pie-chart" class="w-6 h-6"></i></div>
+                        <h3 class="font-semibold text-gray-900">Google Analytics 4</h3>
+                        <p class="text-xs text-gray-500 mt-1">Web Traffic</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-8">
+                    <button onclick="toggleModal('modal-import')" class="text-sm text-gray-500 hover:text-indigo-600 underline decoration-dotted bg-transparent border-none cursor-pointer">No tengo API, subiré un CSV manual luego.</button>
+                </div>
+
+                <div class="flex justify-between pt-8 border-t border-gray-100">
+                    <button onclick="nextSetupStep(1)" class="text-gray-500 hover:text-gray-900 font-medium px-4">Atrás</button>
+                    <button onclick="nextSetupStep(3)" class="bg-black hover:bg-gray-800 text-white font-medium py-2 px-6 rounded-lg transition-colors">Continuar</button>
+                </div>
+            </div>
+
+            <!-- STEP 3 (NUEVO) -->
+            <div id="setup-step-3" class="setup-step hidden fade-in">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Define tu primer producto</h2>
+                <p class="text-gray-500 mb-8">Dale un nombre para verlo en tu portafolio.</p>
+                
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Producto</label>
+                        <input type="text" placeholder="Ej: Plataforma Web" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none text-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Descripción (Opcional)</label>
+                        <input type="text" placeholder="Principal canal de ventas B2C" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-between pt-8 border-t border-gray-100">
+                    <button onclick="nextSetupStep(2)" class="text-gray-500 hover:text-gray-900 font-medium px-4">Atrás</button>
+                    <button onclick="navigateTo('portfolio')" class="bg-black hover:bg-gray-800 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2">
+                        Crear Portafolio <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 3: PORTFOLIO OVERVIEW (NUEVA)         -->
+    <!-- ========================================== -->
+    <section id="view-portfolio" class="view-section flex-col bg-gray-50">
+        <!-- Header Portfolio -->
+        <header class="h-20 bg-white border-b border-gray-200 px-8 flex items-center justify-between shrink-0">
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Resumen de Portafolio</h1>
+                <p class="text-sm text-gray-500">Vista general de salud de productos</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- View Switcher -->
+                <div class="flex items-center bg-white border border-gray-200 rounded-lg p-0.5 mr-2">
+                    <button class="view-btn active p-1.5 rounded hover:text-gray-900 transition-colors" onclick="switchPortfolioView('grid')" id="btn-view-grid" title="Vista Cuadrícula">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                    </button>
+                    <button class="view-btn p-1.5 rounded hover:text-gray-900 transition-colors" onclick="switchPortfolioView('table')" id="btn-view-table" title="Vista Tabla">
+                        <i data-lucide="list" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <div class="relative">
+                    <select class="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-sm">
+                        <option>Todos los Productos</option>
+                        <option>Mis Favoritos</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <button class="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors flex items-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Nuevo Producto
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto p-8">
+            
+            <!-- GRID VIEW (Default) -->
+            <div id="portfolio-grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                
+                <!-- CARD 1: Estable -->
+                <div onclick="navigateTo('dashboard', 'Plataforma Web')" class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md hover:border-indigo-300 cursor-pointer transition-all group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                <i data-lucide="globe" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">Plataforma Web</h3>
+                                <p class="text-xs text-gray-500">Canal Principal</p>
+                            </div>
+                        </div>
+                        <span class="flex h-3 w-3 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                    </div>
+                    <!-- Sparkline SVG -->
+                    <div class="h-16 mb-4">
+                        <svg viewBox="0 0 100 30" class="w-full h-full overflow-visible">
+                            <path d="M0 25 Q10 20 20 22 T40 15 T60 18 T80 10 L100 5" fill="none" stroke="#10B981" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="flex justify-between items-end border-t border-gray-50 pt-4">
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium uppercase">Conversión</p>
+                            <p class="text-2xl font-bold text-gray-900">2.4%</p>
+                        </div>
+                        <span class="bg-green-50 text-green-700 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+                            <i data-lucide="trending-up" class="w-3 h-3"></i> 5.2%
+                        </span>
+                    </div>
+                </div>
+
+                <!-- CARD 2: Warning -->
+                <div onclick="navigateTo('dashboard', 'App Móvil iOS')" class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md hover:border-amber-300 cursor-pointer transition-all group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-900">
+                                <i data-lucide="smartphone" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-amber-600 transition-colors">App Móvil iOS</h3>
+                                <p class="text-xs text-gray-500">v4.2.0</p>
+                            </div>
+                        </div>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-400"></span>
+                    </div>
+                    <!-- Sparkline SVG -->
+                    <div class="h-16 mb-4">
+                        <svg viewBox="0 0 100 30" class="w-full h-full overflow-visible">
+                            <path d="M0 15 Q20 15 40 15 T60 15 T80 20 L100 25" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4 2" />
+                        </svg>
+                    </div>
+                    <div class="flex justify-between items-end border-t border-gray-50 pt-4">
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium uppercase">Retención D30</p>
+                            <p class="text-2xl font-bold text-gray-900">42%</p>
+                        </div>
+                        <span class="bg-gray-50 text-gray-500 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+                            <i data-lucide="minus" class="w-3 h-3"></i> 0.0%
+                        </span>
+                    </div>
+                </div>
+
+                <!-- CARD 3: Critical -->
+                <div onclick="navigateTo('dashboard', 'Backoffice Admin')" class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md hover:border-red-300 cursor-pointer transition-all group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-900">
+                                <i data-lucide="server" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-red-600 transition-colors">Backoffice Admin</h3>
+                                <p class="text-xs text-gray-500">Herramientas Internas</p>
+                            </div>
+                        </div>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 shadow-sm shadow-red-200"></span>
+                    </div>
+                    <!-- Sparkline SVG -->
+                    <div class="h-16 mb-4">
+                        <svg viewBox="0 0 100 30" class="w-full h-full overflow-visible">
+                            <path d="M0 5 Q20 5 40 8 T60 15 L80 25 L100 28" fill="none" stroke="#EF4444" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="flex justify-between items-end border-t border-gray-50 pt-4">
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium uppercase">Tasa de Errores</p>
+                            <p class="text-2xl font-bold text-gray-900">1.8%</p>
+                        </div>
+                        <span class="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+                            <i data-lucide="trending-up" class="w-3 h-3"></i> +0.5%
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLE VIEW (Hidden by default) -->
+            <div id="portfolio-table-view" class="hidden max-w-7xl mx-auto bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider w-1/3">Producto</th>
+                            <th class="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Salud</th>
+                            <th class="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Métrica Norte</th>
+                            <th class="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tendencia (7d)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <!-- Row 1 -->
+                        <tr class="group hover:bg-gray-50 cursor-pointer transition-colors even:bg-white odd:bg-gray-50/50" onclick="navigateTo('dashboard', 'Plataforma Web')">
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                                        <i data-lucide="globe" class="w-4 h-4"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">Plataforma Web</p>
+                                        <p class="text-xs text-gray-500">Canal Principal</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                    Estable
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-sm font-bold text-gray-900">2.4%</span>
+                                    <span class="text-xs text-gray-500">Conversión</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="text-green-600 text-xs font-bold flex items-center gap-1 bg-green-50 px-2 py-1 rounded w-fit">
+                                    <i data-lucide="trending-up" class="w-3 h-3"></i> 5.2%
+                                </span>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2 -->
+                        <tr class="group hover:bg-gray-50 cursor-pointer transition-colors even:bg-white odd:bg-gray-50/50" onclick="navigateTo('dashboard', 'App Móvil iOS')">
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-900 shrink-0">
+                                        <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-900 group-hover:text-amber-600 transition-colors">App Móvil iOS</p>
+                                        <p class="text-xs text-gray-500">v4.2.0</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    Warning
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-sm font-bold text-gray-900">42%</span>
+                                    <span class="text-xs text-gray-500">Retención D30</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="text-gray-500 text-xs font-bold flex items-center gap-1 bg-gray-100 px-2 py-1 rounded w-fit">
+                                    <i data-lucide="minus" class="w-3 h-3"></i> 0.0%
+                                </span>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3 -->
+                        <tr class="group hover:bg-gray-50 cursor-pointer transition-colors even:bg-white odd:bg-gray-50/50" onclick="navigateTo('dashboard', 'Backoffice Admin')">
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-900 shrink-0">
+                                        <i data-lucide="server" class="w-4 h-4"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-900 group-hover:text-red-600 transition-colors">Backoffice Admin</p>
+                                        <p class="text-xs text-gray-500">Herramientas Internas</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                    Crítico
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-sm font-bold text-gray-900">1.8%</span>
+                                    <span class="text-xs text-gray-500">Tasa Errores</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="text-red-600 text-xs font-bold flex items-center gap-1 bg-red-50 px-2 py-1 rounded w-fit">
+                                    <i data-lucide="trending-up" class="w-3 h-3"></i> +0.5%
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </main>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 4: DASHBOARD (Unified Timeline)       -->
+    <!-- ========================================== -->
+    <section id="view-dashboard" class="view-section flex-col">
+        <!-- HEADER DASHBOARD -->
+        <header class="h-14 border-b border-gray-200 bg-white flex items-center justify-between px-6 shrink-0 z-20">
+            <div class="flex items-center gap-4 text-sm">
+                <!-- Back Button -->
+                <button onclick="navigateTo('portfolio')" class="p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-900 transition-colors">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </button>
+                <div class="h-6 w-px bg-gray-200"></div>
+                <!-- Breadcrumbs -->
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 text-gray-500 hover:text-gray-900 cursor-pointer transition-colors" onclick="navigateTo('portfolio')">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                        <span class="font-medium">Portafolio</span>
+                    </div>
+                    <span class="text-gray-300">/</span>
+                    
+                    <!-- DROPDOWN PRODUCTO ACTIVO -->
+                    <div class="relative">
+                        <div onclick="toggleProjectDropdown(event)" class="flex items-center gap-2 text-gray-900 font-semibold bg-gray-100 px-2 py-1 rounded-md cursor-pointer hover:bg-gray-200 transition-colors select-none">
+                            <span id="dashboard-project-name">Plataforma Web</span>
+                            <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500"></i>
+                        </div>
+                        <!-- Dropdown Menu -->
+                        <div id="project-dropdown-menu" class="hidden absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1">
+                            <div onclick="selectProject('Plataforma Web')" class="px-4 py-2 hover:bg-gray-50 text-sm cursor-pointer text-gray-700 font-medium">Plataforma Web</div>
+                            <div onclick="selectProject('App Móvil iOS')" class="px-4 py-2 hover:bg-gray-50 text-sm cursor-pointer text-gray-700 font-medium">App Móvil iOS</div>
+                            <div onclick="selectProject('Backoffice Admin')" class="px-4 py-2 hover:bg-gray-50 text-sm cursor-pointer text-gray-700 font-medium">Backoffice Admin</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TIME RANGE SELECTOR -->
+            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center bg-gray-50 border border-gray-200 rounded-lg p-0.5">
+                <button onclick="setTimeRange('7D')" id="btn-range-7d" class="time-range-btn active px-3 py-1 text-xs font-medium text-gray-900 bg-white shadow-sm rounded-md border border-gray-200">7D</button>
+                <button onclick="setTimeRange('14D')" id="btn-range-14d" class="time-range-btn px-3 py-1 text-xs font-medium text-gray-500 hover:text-gray-900 hover:bg-white rounded-md transition-all">14D</button>
+                <button onclick="setTimeRange('30D')" id="btn-range-30d" class="time-range-btn px-3 py-1 text-xs font-medium text-gray-500 hover:text-gray-900 hover:bg-white rounded-md transition-all">30D</button>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="toggleModal('modal-import')" class="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors" title="Importar CSV">
+                    <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                </button>
+                <div class="h-4 w-px bg-gray-300"></div>
+                <button class="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                </button>
+                <button onclick="toggleModal('modal-manual')" class="flex items-center gap-2 bg-black hover:bg-gray-800 text-white text-xs font-medium px-3 py-2 rounded-md transition-colors shadow-sm">
+                    <i data-lucide="plus" class="w-3 h-3"></i>
+                    Registrar Evento
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden">
+            <!-- MAIN AREA -->
+            <main class="flex-1 flex flex-col min-w-0 bg-white relative">
+                <!-- METRIC SELECTOR BAR -->
+                <div class="h-12 border-b border-gray-100 flex items-center px-6 gap-6 text-xs font-medium text-gray-500 bg-white z-10 overflow-x-auto" id="metric-bar">
+                    <div class="metric-tab active flex items-center gap-2 hover:text-gray-900 h-full px-1 cursor-pointer transition-colors border-b-2 border-transparent" 
+                         onclick="switchMetric(this, 'conversion')" style="--active-color: #6366F1">
+                        <span class="metric-dot w-2 h-2 rounded-full"></span> Tasa de Conversión
+                    </div>
+                    <div class="metric-tab flex items-center gap-2 hover:text-gray-900 h-full px-1 cursor-pointer transition-colors border-b-2 border-transparent"
+                         onclick="switchMetric(this, 'abandonment')" style="--active-color: #F59E0B">
+                        <span class="metric-dot w-2 h-2 rounded-full"></span> Abandono Carrito
+                    </div>
+                    <div class="metric-tab flex items-center gap-2 hover:text-gray-900 h-full px-1 cursor-pointer transition-colors border-b-2 border-transparent"
+                         onclick="switchMetric(this, 'errors')" style="--active-color: #EF4444">
+                        <span class="metric-dot w-2 h-2 rounded-full"></span> Tasa de Errores
+                    </div>
+                    <div class="metric-tab flex items-center gap-2 hover:text-gray-900 h-full px-1 cursor-pointer transition-colors border-b-2 border-transparent"
+                         onclick="switchMetric(this, 'loading')" style="--active-color: #10B981">
+                        <span class="metric-dot w-2 h-2 rounded-full"></span> Tiempo de Carga
+                    </div>
+                </div>
+
+                <div class="flex-1 relative p-6 overflow-hidden bg-white" id="timeline-container">
+                    <div id="cursor-line"></div>
+                    
+                    <!-- Tooltip -->
+                    <div id="tooltip" class="absolute z-50 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl w-64 opacity-0 pointer-events-none transition-opacity duration-200">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="font-semibold text-gray-200" id="tooltip-title">Title</span>
+                            <span class="bg-gray-700 px-1.5 py-0.5 rounded text-[10px] text-gray-300" id="tooltip-time">Time</span>
+                        </div>
+                        <p class="text-gray-400 mb-2 leading-tight" id="tooltip-desc">Description</p>
+                    </div>
+
+                    <!-- Lane Eventos -->
+                    <div id="events-lane" class="h-16 w-full relative mb-4 border-b border-dashed border-gray-100"></div>
+
+                    <!-- Chart -->
+                    <div class="w-full h-[calc(100%-5rem)] relative">
+                        <canvas id="mainChart"></canvas>
+                        <div class="absolute top-0 right-0 p-4 text-right pointer-events-none transition-opacity duration-300" id="kpi-overlay">
+                            <p class="text-sm text-gray-500 font-medium" id="kpi-label">Conversión Actual</p>
+                            <p class="text-3xl font-bold tracking-tight text-gray-900" id="kpi-value">
+                                2.4% <span class="text-sm font-medium text-red-500 bg-red-50 px-1.5 py-0.5 rounded ml-1">↓ 0.5%</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- SIDEBAR INSIGHTS -->
+            <aside class="w-80 bg-gray-50 border-l border-gray-200 flex flex-col shrink-0 z-20">
+                <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-white">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded bg-purple-100 flex items-center justify-center text-purple-600">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        </div>
+                        <span class="font-semibold text-sm text-gray-900">AI Analyst</span>
+                    </div>
+                    <span class="bg-purple-100 text-purple-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">2 NUEVOS</span>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                    <div onclick="toggleModal('modal-insight')" class="bg-white p-3 rounded-lg border-l-4 border-l-red-500 border-y border-r border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-[10px] font-bold text-red-600 uppercase tracking-wide">Impacto Crítico</span>
+                            <span class="text-[10px] text-gray-400">Hace 2h</span>
+                        </div>
+                        <h3 class="text-xs font-semibold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">Caída de Conversión post-deploy</h3>
+                        <p class="text-[11px] text-gray-500 leading-snug">Se detectó una correlación del 92% entre el <strong>Deploy v2.4</strong> y la caída en el funnel.</p>
+                        <div class="mt-2 text-[10px] text-indigo-600 font-medium group-hover:underline">Ver Evidencia →</div>
+                    </div>
+                    
+                    <div class="bg-white p-3 rounded-lg border-l-4 border-l-amber-400 border-y border-r border-gray-200 shadow-sm hover:shadow-md transition-all cursor-pointer">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Anomalía Leve</span>
+                            <span class="text-[10px] text-gray-400">Hace 5h</span>
+                        </div>
+                        <h3 class="text-xs font-semibold text-gray-900 mb-1">Latencia inusual API Login</h3>
+                        <p class="text-[11px] text-gray-500 leading-snug">Tiempos de respuesta +200ms sin deploy asociado.</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- MODALS                                     -->
+    <!-- ========================================== -->
+    <div id="modal-manual" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onclick="toggleModal('modal-manual')"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-full max-w-md p-6 scale-95 opacity-0 transition-all duration-200" id="modal-manual-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-gray-900">Registrar Evento Externo</h3>
+                <button onclick="toggleModal('modal-manual')" class="text-gray-400 hover:text-gray-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Nombre del Evento</label>
+                    <input type="text" placeholder="Ej: Campaña Black Friday" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
+                    <textarea class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none h-20 resize-none"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+                <button onclick="toggleModal('modal-manual')" class="text-sm font-medium text-gray-500 hover:text-gray-900">Cancelar</button>
+                <button onclick="toggleModal('modal-manual')" class="bg-black hover:bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded-lg">Guardar Evento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW IMPORT MODAL -->
+    <div id="modal-import" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onclick="toggleModal('modal-import')"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-full max-w-2xl p-0 scale-95 opacity-0 transition-all duration-200 overflow-hidden" id="modal-import-content">
+            
+            <!-- HEADER CON BOTÓN ATRÁS -->
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                <div class="flex items-center gap-3">
+                    <!-- Back Button (Hidden initially) -->
+                    <button id="btn-import-back" class="hidden p-1.5 -ml-2 rounded-full hover:bg-gray-200 text-gray-500 transition-colors focus:outline-none" onclick="prevImportStep()" title="Volver">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg">Importar Datos Externos</h3>
+                        <p class="text-xs text-gray-500">Carga masiva vía CSV</p>
+                    </div>
+                </div>
+                <button onclick="toggleModal('modal-import')" class="text-gray-400 hover:text-gray-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="p-6">
+                <!-- STATE 1: UPLOAD -->
+                <div id="import-step-1" class="block">
+                    <!-- Tabs -->
+                    <div class="flex gap-4 mb-6 border-b border-gray-100">
+                        <button class="import-tab active flex items-center gap-2 pb-3 px-1 text-sm font-medium" onclick="switchImportTab(this, 'eventos')">
+                            <i data-lucide="calendar" class="w-4 h-4"></i> Eventos
+                        </button>
+                        <button class="import-tab flex items-center gap-2 pb-3 px-1 text-sm font-medium" onclick="switchImportTab(this, 'metricas')">
+                            <i data-lucide="bar-chart-2" class="w-4 h-4"></i> Métricas
+                        </button>
+                    </div>
+
+                    <!-- Dropzone -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-12 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors cursor-pointer" onclick="simulateFileUpload()">
+                        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900 mb-1">Arrastra tu archivo CSV aquí</p>
+                        <p class="text-xs text-gray-500 mb-4">o haz clic para buscar</p>
+                        <button class="text-xs text-indigo-600 font-medium hover:underline">Descargar plantilla</button>
+                    </div>
+                </div>
+
+                <!-- STATE 2: MAPPER -->
+                <div id="import-step-2" class="hidden">
+                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg mb-6 border border-gray-200">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="file-spreadsheet" class="w-5 h-5 text-green-600"></i>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">campañas_q3.csv</p>
+                                <p class="text-[10px] text-gray-500">45 KB • 120 filas</p>
+                            </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-red-500" onclick="prevImportStep()" title="Cambiar archivo"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+
+                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Mapeo de Columnas</h4>
+                    <div class="grid grid-cols-2 gap-x-8 gap-y-4 mb-6">
+                        <!-- Row 1 -->
+                        <div class="text-sm text-gray-600 flex items-center h-10 border-b border-gray-100">fecha_registro</div>
+                        <div class="flex items-center">
+                            <i data-lucide="arrow-right" class="w-3 h-3 text-gray-300 mr-2"></i>
+                            <select class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <option>Fecha del Evento</option>
+                            </select>
+                        </div>
+                        <!-- Row 2 -->
+                        <div class="text-sm text-gray-600 flex items-center h-10 border-b border-gray-100">nombre_campaña</div>
+                        <div class="flex items-center">
+                            <i data-lucide="arrow-right" class="w-3 h-3 text-gray-300 mr-2"></i>
+                            <select class="w-full bg-white border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <option>Título / Nombre</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
+                        <label class="block text-xs font-medium text-indigo-900 mb-1">Categoría por defecto</label>
+                        <select class="w-full bg-white border border-indigo-200 rounded-md px-2 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option>Marketing</option>
+                            <option>Ventas</option>
+                            <option>Incidente</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- STATE 3: VALIDATION -->
+                <div id="import-step-3" class="hidden text-center py-4">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="check" class="w-8 h-8"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 mb-2">¡Todo listo!</h4>
+                    <p class="text-sm text-gray-500 mb-6">Se importarán <strong>120 eventos</strong> al historial.</p>
+                    
+                    <!-- Error warning mock -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-left flex gap-3 mb-4">
+                        <i data-lucide="alert-circle" class="w-5 h-5 text-amber-500 shrink-0"></i>
+                        <div>
+                            <p class="text-xs font-bold text-amber-800">Advertencia</p>
+                            <p class="text-[11px] text-amber-700">2 filas tienen fecha inválida y serán ignoradas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                <button class="text-sm font-medium text-gray-500 hover:text-gray-900 px-3 py-2" onclick="toggleModal('modal-import')">Cancelar</button>
+                <button id="btn-import-action" class="bg-black hover:bg-gray-800 text-white text-sm font-medium px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="nextImportStep()">Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-insight" class="fixed inset-0 z-50 hidden overflow-hidden">
+        <div class="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity" onclick="toggleModal('modal-insight')"></div>
+        <div class="absolute top-0 right-0 h-full w-full max-w-lg bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-out flex flex-col" id="modal-insight-panel">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-start bg-gray-50/50">
+                <div class="pr-8">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200 mb-3">
+                        <i data-lucide="alert-triangle" class="w-3 h-3"></i> IMPACTO ALTO
+                    </span>
+                    <h2 class="text-xl font-bold text-gray-900 leading-tight">Deploy v2.1 coincide con caída de usuarios</h2>
+                </div>
+                <button onclick="toggleModal('modal-insight')" class="text-gray-400 hover:text-gray-700 bg-white rounded-full p-1 border border-gray-200 hover:border-gray-300 transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6">
+                    <p class="text-sm text-blue-900 leading-relaxed">
+                        Detectamos un patrón inusual: 15 minutos después del deploy, la métrica <strong>Checkout Success</strong> cayó un <strong>15%</strong>.
+                    </p>
+                </div>
+                <div class="flex border border-gray-200 rounded-xl overflow-hidden mb-6 h-48">
+                    <div class="w-1/2 border-r border-gray-200 bg-gray-50 p-4">
+                        <p class="text-xs font-semibold text-gray-500 mb-3">LA CAUSA</p>
+                        <div class="flex items-start gap-2">
+                            <i data-lucide="git-commit" class="w-4 h-4 text-gray-400 mt-0.5"></i>
+                            <div>
+                                <p class="text-xs font-mono text-gray-900 bg-white border border-gray-200 px-1 rounded inline-block">a1b2c</p>
+                                <p class="text-xs text-gray-600 mt-0.5">update stripe sdk</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-1/2 p-4 bg-white relative">
+                         <p class="text-xs font-semibold text-gray-500 mb-1">EL EFECTO</p>
+                         <div class="flex items-end gap-2 mb-2">
+                             <span class="text-2xl font-bold text-gray-900">2.1%</span>
+                             <span class="text-sm font-bold text-red-500 mb-1">-15%</span>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-100 bg-gray-50">
+                <div class="flex gap-3">
+                    <button class="flex-1 bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 font-medium py-2 rounded-lg text-sm transition-colors">Descartar</button>
+                    <button class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg text-sm transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="check" class="w-4 h-4"></i> Confirmar Causa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEV CONTROLS -->
+    <div class="fixed bottom-4 right-4 z-50 group">
+        <button class="bg-gray-900 text-white p-3 rounded-full shadow-lg hover:scale-110 transition-transform">
+            <i data-lucide="monitor" class="w-5 h-5"></i>
+        </button>
+        <div class="absolute bottom-full right-0 mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl p-2 hidden group-hover:block">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">Saltar a pantalla</p>
+            <button onclick="navigateTo('login')" class="w-full text-left text-xs px-2 py-1.5 hover:bg-gray-100 rounded text-gray-700">1. Login</button>
+            <button onclick="navigateTo('setup')" class="w-full text-left text-xs px-2 py-1.5 hover:bg-gray-100 rounded text-gray-700">2. Setup Wizard</button>
+            <button onclick="navigateTo('portfolio')" class="w-full text-left text-xs px-2 py-1.5 hover:bg-gray-100 rounded text-gray-700">3. Portfolio (Nuevo)</button>
+            <button onclick="navigateTo('dashboard')" class="w-full text-left text-xs px-2 py-1.5 hover:bg-gray-100 rounded text-gray-700">4. Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize icons safely
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        /* --- NAVIGATION LOGIC --- */
+        function navigateTo(viewId, projectName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            
+            if (viewId === 'setup') resetSetup();
+            if (viewId === 'dashboard') {
+                if(projectName) document.getElementById('dashboard-project-name').innerText = projectName;
+                // Slight delay to allow DOM to render
+                setTimeout(() => initChart('conversion'), 100);
+            }
+        }
+
+        function toggleSelection(el) {
+            el.classList.toggle('selected');
+            el.classList.toggle('border-indigo-500');
+            el.classList.toggle('ring-1');
+            el.classList.toggle('ring-indigo-500');
+        }
+
+        function nextSetupStep(step) {
+            document.querySelectorAll('.setup-step').forEach(el => el.classList.add('hidden'));
+            document.getElementById('setup-step-' + step).classList.remove('hidden');
+            
+            for (let i = 2; i <= step; i++) {
+                if (i > 3) break; 
+                const indicator = document.getElementById('step-indicator-' + i).querySelector('div');
+                if (indicator) {
+                    indicator.className = "w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-sm font-bold transition-colors";
+                    indicator.parentElement.querySelector('span').classList.remove('text-gray-400');
+                    indicator.parentElement.querySelector('span').classList.add('text-gray-900');
+                }
+            }
+        }
+
+        function resetSetup() {
+            nextSetupStep(1);
+            ['2','3'].forEach(i => {
+                const el = document.getElementById('step-indicator-' + i).querySelector('div');
+                if (el) {
+                    el.className = "w-8 h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-sm font-bold border border-gray-200 transition-colors";
+                    el.parentElement.querySelector('span').classList.add('text-gray-400');
+                }
+            });
+        }
+
+        /* --- PROJECT DROPDOWN LOGIC --- */
+        function toggleProjectDropdown(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('project-dropdown-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
+        function selectProject(name) {
+            const nameEl = document.getElementById('dashboard-project-name');
+            const menu = document.getElementById('project-dropdown-menu');
+            if (nameEl) nameEl.innerText = name;
+            if (menu) menu.classList.add('hidden');
+            initChart(currentMetric); 
+        }
+
+        document.addEventListener('click', () => {
+             const menu = document.getElementById('project-dropdown-menu');
+             if (menu && !menu.classList.contains('hidden')) {
+                 menu.classList.add('hidden');
+             }
+        });
+
+        /* --- MODAL LOGIC --- */
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            if (modalId === 'modal-import') {
+                const content = document.getElementById('modal-import-content');
+                if (modal.classList.contains('hidden')) {
+                    modal.classList.remove('hidden');
+                    resetImport(); 
+                    setTimeout(() => {
+                        content.classList.remove('opacity-0', 'scale-95');
+                        content.classList.add('opacity-100', 'scale-100');
+                    }, 10);
+                } else {
+                    content.classList.remove('opacity-100', 'scale-100');
+                    content.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => modal.classList.add('hidden'), 200);
+                }
+            }
+            else if (modalId === 'modal-insight') {
+                const panel = document.getElementById('modal-insight-panel');
+                if (modal.classList.contains('hidden')) {
+                    modal.classList.remove('hidden');
+                    setTimeout(() => panel.classList.remove('translate-x-full'), 10);
+                } else {
+                    panel.classList.add('translate-x-full');
+                    setTimeout(() => modal.classList.add('hidden'), 300);
+                }
+            } else {
+                const content = document.getElementById('modal-manual-content');
+                if (modal.classList.contains('hidden')) {
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                        content.classList.remove('opacity-0', 'scale-95');
+                        content.classList.add('opacity-100', 'scale-100');
+                    }, 10);
+                } else {
+                    content.classList.remove('opacity-100', 'scale-100');
+                    content.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => modal.classList.add('hidden'), 200);
+                }
+            }
+        }
+
+        /* --- IMPORT MODAL LOGIC --- */
+        let importStep = 1;
+
+        function switchImportTab(el, type) {
+            document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function simulateFileUpload() {
+            const dropzone = document.querySelector('#import-step-1 .border-dashed');
+            if (!dropzone) return;
+            
+            dropzone.innerHTML = `<i data-lucide="loader-2" class="w-8 h-8 text-indigo-600 animate-spin"></i>`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            
+            setTimeout(() => {
+                nextImportStep();
+            }, 800);
+        }
+
+        function nextImportStep() {
+            if (importStep === 1) {
+                document.getElementById('import-step-1').classList.add('hidden');
+                document.getElementById('import-step-2').classList.remove('hidden');
+                const backBtn = document.getElementById('btn-import-back');
+                if (backBtn) backBtn.classList.remove('hidden');
+                
+                const actionBtn = document.getElementById('btn-import-action');
+                if (actionBtn) {
+                    actionBtn.innerText = "Continuar";
+                    actionBtn.disabled = false;
+                }
+                importStep = 2;
+            } else if (importStep === 2) {
+                document.getElementById('import-step-2').classList.add('hidden');
+                document.getElementById('import-step-3').classList.remove('hidden');
+                const actionBtn = document.getElementById('btn-import-action');
+                if (actionBtn) actionBtn.innerText = "Finalizar Importación";
+                importStep = 3;
+            } else {
+                toggleModal('modal-import');
+            }
+        }
+
+        function prevImportStep() {
+            if (importStep === 2) {
+                resetImport(); 
+            } else if (importStep === 3) {
+                document.getElementById('import-step-3').classList.add('hidden');
+                document.getElementById('import-step-2').classList.remove('hidden');
+                document.getElementById('btn-import-action').innerText = "Continuar";
+                importStep = 2;
+            }
+        }
+
+        function resetImport() {
+            importStep = 1;
+            document.getElementById('import-step-1').classList.remove('hidden');
+            document.getElementById('import-step-2').classList.add('hidden');
+            document.getElementById('import-step-3').classList.add('hidden');
+            
+            const backBtn = document.getElementById('btn-import-back');
+            if (backBtn) backBtn.classList.add('hidden');
+
+            const actionBtn = document.getElementById('btn-import-action');
+            if (actionBtn) {
+                actionBtn.innerText = "Importar";
+                actionBtn.disabled = true;
+            }
+            
+            const dropzone = document.querySelector('#import-step-1 .border-dashed');
+            if(dropzone) {
+                dropzone.innerHTML = `
+                    <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-4">
+                        <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                    </div>
+                    <p class="text-sm font-medium text-gray-900 mb-1">Arrastra tu archivo CSV aquí</p>
+                    <p class="text-xs text-gray-500 mb-4">o haz clic para buscar</p>
+                    <button class="text-xs text-indigo-600 font-medium hover:underline">Descargar plantilla</button>
+                `;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+
+        /* --- CHART LOGIC --- */
+        let chartInstance = null;
+        let currentMetric = 'conversion';
+        let currentTimeRange = '7D'; // Default Range
+
+        const metricData = {
+            'conversion': { label: 'Conversión (%)', unit: '%', color: '#6366F1', current: '2.4%', change: '↓ 0.5%', changeColor: 'text-red-500 bg-red-50', min: 1.5, generate: (i, total) => (i > total * 0.8 ? 2.1 + Math.random()*0.3 : 2.5 + Math.random()*0.5) },
+            'abandonment': { label: 'Abandono (%)', unit: '%', color: '#F59E0B', current: '68.2%', change: '↑ 2.1%', changeColor: 'text-red-500 bg-red-50', min: 50, generate: (i, total) => (i > total * 0.8 ? 70 + Math.random()*3 : 65 + Math.random()*4) },
+            'errors': { label: 'Errores (%)', unit: '%', color: '#EF4444', current: '0.45%', change: '↑ 0.12%', changeColor: 'text-red-500 bg-red-50', min: 0, generate: (i, total) => (i > total * 0.8 ? 0.6 + Math.random()*0.2 : 0.1 + Math.random()*0.15) },
+            'loading': { label: 'Carga (s)', unit: 's', color: '#10B981', current: '1.2s', change: '- 0.1s', changeColor: 'text-green-500 bg-green-50', min: 0.5, generate: (i, total) => 1.0 + Math.random()*0.4 }
+        };
+
+        function setTimeRange(range) {
+            currentTimeRange = range;
+            
+            // Update Buttons UI
+            document.querySelectorAll('.time-range-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-white', 'shadow-sm', 'border-gray-200', 'text-gray-900');
+                btn.classList.add('text-gray-500', 'border-transparent');
+            });
+            
+            const activeBtn = document.getElementById('btn-range-' + range.toLowerCase());
+            if(activeBtn) {
+                activeBtn.classList.add('active', 'bg-white', 'shadow-sm', 'border-gray-200', 'text-gray-900');
+                activeBtn.classList.remove('text-gray-500', 'border-transparent');
+            }
+
+            // Regenerate Chart
+            initChart(currentMetric);
+        }
+
+        // Helper para formatear fechas (ej: "26 Nov")
+        function formatDateLabel(date) {
+            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            return `${date.getDate()} ${months[date.getMonth()]}`;
+        }
+
+        function getLabelsAndData(range, metricConfig) {
+            let labels = [];
+            let data = [];
+            let count = 7; // Default
+
+            if (range === '7D') count = 7;
+            else if (range === '14D') count = 14;
+            else if (range === '30D') count = 30;
+
+            // Generar fechas reales hacia atrás desde hoy
+            const today = new Date();
+            for (let i = count - 1; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                labels.push(formatDateLabel(d));
+            }
+
+            // Generar datos dummy
+            data = Array.from({length: count}, (_, i) => metricConfig.generate(i, count));
+            
+            return { labels, data };
+        }
+
+        function switchMetric(el, metricKey) {
+            document.querySelectorAll('.metric-tab').forEach(tab => tab.classList.remove('active'));
+            el.classList.add('active');
+            currentMetric = metricKey;
+            updateChartData(metricKey);
+        }
+
+        function updateChartData(key) {
+            if (!chartInstance) return;
+            const config = metricData[key];
+            const { data, labels } = getLabelsAndData(currentTimeRange, config);
+            
+            chartInstance.data.labels = labels;
+            chartInstance.data.datasets[0].label = config.label;
+            chartInstance.data.datasets[0].data = data;
+            chartInstance.data.datasets[0].borderColor = config.color;
+            
+            const ctx = chartInstance.ctx;
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, hexToRgba(config.color, 0.2));
+            gradient.addColorStop(1, hexToRgba(config.color, 0));
+            chartInstance.data.datasets[0].backgroundColor = gradient;
+            
+            chartInstance.options.scales.y.min = config.min;
+            chartInstance.options.scales.y.ticks.callback = function(value) { return parseFloat(value.toFixed(1)) + config.unit; };
+            
+            chartInstance.update();
+            
+            document.getElementById('kpi-label').innerText = config.label.split('(')[0];
+            document.getElementById('kpi-value').innerHTML = `${config.current} <span class="text-sm font-medium ${config.changeColor} px-1.5 py-0.5 rounded ml-1">${config.change}</span>`;
+            
+            renderEvents(); 
+        }
+
+        function hexToRgba(hex, alpha) {
+            const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function initChart(initialMetric) {
+            if (chartInstance) chartInstance.destroy();
+            const ctx = document.getElementById('mainChart');
+            if (!ctx) return; 
+
+            const config = metricData[initialMetric];
+            const { labels, data } = getLabelsAndData(currentTimeRange, config);
+
+            const context = ctx.getContext('2d');
+            const gradient = context.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, hexToRgba(config.color, 0.2));
+            gradient.addColorStop(1, hexToRgba(config.color, 0));
+
+            chartInstance = new Chart(context, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: config.label, data: data, borderColor: config.color, backgroundColor: gradient, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: true, grid: { display: false }, ticks: { font: { family: 'Inter', size: 10 }, color: '#9CA3AF', maxTicksLimit: 8 }, border: { display: false } },
+                        y: { display: true, min: config.min, grid: { color: '#F3F4F6', borderDash: [4, 4], drawBorder: false }, ticks: { font: { family: 'Inter', size: 10 }, color: '#9CA3AF', callback: function(value) { return parseFloat(value.toFixed(1)) + config.unit; } }, border: { display: false } }
+                    }
+                }
+            });
+            renderEvents();
+            setupCursor();
+        }
+
+        function renderEvents() {
+            const lane = document.getElementById('events-lane');
+            if (!lane) return;
+            lane.innerHTML = '';
+            const containerWidth = lane.offsetWidth;
+            
+            // Simular eventos: Distribuidos en el tiempo (0 a 100% del ancho)
+            // Ahora que son días, simulamos que los eventos ocurrieron en los últimos días
+            let events = [];
+            
+            if (currentTimeRange === '7D') {
+                events = [
+                    { percent: 0.2, icon: 'rocket', color: 'bg-blue-100 text-blue-600', title: 'Deploy v1.9 (Hace 5d)' },
+                    { percent: 0.6, icon: 'bug', color: 'bg-amber-100 text-amber-600', title: 'Incidente Login (Hace 2d)' },
+                    { percent: 0.9, icon: 'alert-triangle', color: 'bg-red-100 text-red-600 ring-2 ring-red-50', title: 'Fallo Reciente (Hoy)' }
+                ];
+            } else if (currentTimeRange === '14D') {
+                events = [
+                    { percent: 0.3, icon: 'rocket', color: 'bg-blue-100 text-blue-600', title: 'Deploy v1.8' },
+                    { percent: 0.7, icon: 'rocket', color: 'bg-blue-100 text-blue-600', title: 'Deploy v1.9' },
+                    { percent: 0.95, icon: 'alert-triangle', color: 'bg-red-100 text-red-600 ring-2 ring-red-50', title: 'Fallo Reciente' }
+                ];
+            } else {
+                // 30D
+                events = [
+                    { percent: 0.1, icon: 'rocket', color: 'bg-blue-100 text-blue-600', title: 'v1.0' },
+                    { percent: 0.4, icon: 'rocket', color: 'bg-blue-100 text-blue-600', title: 'v1.5' },
+                    { percent: 0.8, icon: 'rocket', color: 'bg-green-100 text-green-600', title: 'v2.0' },
+                    { percent: 0.98, icon: 'alert-triangle', color: 'bg-red-100 text-red-600 ring-2 ring-red-50', title: 'Alerta' }
+                ];
+            }
+
+            events.forEach(ev => {
+                const el = document.createElement('div');
+                el.className = `event-node absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full border flex items-center justify-center cursor-pointer shadow-sm z-10 ${ev.color}`;
+                el.style.left = (ev.percent * containerWidth) + 'px';
+                el.innerHTML = `<i data-lucide="${ev.icon}" class="w-4 h-4"></i>`;
+                el.onmouseenter = (e) => showTooltip(e, ev.title);
+                el.onmouseleave = hideTooltip;
+                lane.appendChild(el);
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function setupCursor() {
+            const container = document.getElementById('timeline-container');
+            const cursor = document.getElementById('cursor-line');
+            if (!container || !cursor) return;
+            
+            // Remove old listeners ideally, but for MVP simplicity we just add new ones.
+            container.addEventListener('mousemove', (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                if (x >= 0 && x <= rect.width) { cursor.style.display = 'block'; cursor.style.left = x + 'px'; }
+            });
+            container.addEventListener('mouseleave', () => cursor.style.display = 'none');
+        }
+
+        function showTooltip(e, text) {
+            const t = document.getElementById('tooltip');
+            if (!t) return;
+            const rect = e.target.getBoundingClientRect();
+            t.style.left = (rect.left + 20) + 'px'; t.style.top = (rect.top - 80) + 'px';
+            const titleEl = document.getElementById('tooltip-title');
+            if(titleEl) titleEl.innerText = text;
+            const descEl = document.getElementById('tooltip-desc');
+            if(descEl) descEl.innerText = "Detalles del evento simulado.";
+            const timeEl = document.getElementById('tooltip-time');
+            if(timeEl) timeEl.innerText = "10:00 AM";
+            t.style.opacity = 1;
+        }
+
+        function hideTooltip() { 
+            const t = document.getElementById('tooltip');
+            if(t) t.style.opacity = 0; 
+        }
+
+        /* --- PORTFOLIO VIEW SWITCHER --- */
+        function switchPortfolioView(viewType) {
+            const gridView = document.getElementById('portfolio-grid-view');
+            const tableView = document.getElementById('portfolio-table-view');
+            const btnGrid = document.getElementById('btn-view-grid');
+            const btnTable = document.getElementById('btn-view-table');
+
+            if (viewType === 'grid') {
+                gridView.classList.remove('hidden');
+                tableView.classList.add('hidden');
+                
+                btnGrid.classList.add('active');
+                btnTable.classList.remove('active');
+            } else {
+                gridView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                
+                btnGrid.classList.remove('active');
+                btnTable.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
